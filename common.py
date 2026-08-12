@@ -23,11 +23,11 @@ PLOTS_DIR.mkdir(exist_ok=True)
 # Cached bootstrap/analysis results, written by analyze.py and read by plot.py
 ANALYSIS_CACHE = SCRIPT_DIR / "analysis_cache.pkl"
 
-# DRL methods to compare. EDSP and Lei have their result folders created but
-# not filled in yet; add them here once test data has landed (analyze.py
-# handles missing files gracefully, but including a method with zero data
-# just floods the run with "missing" warnings).
-METHODS = ["dan", "song", "sagc"]
+# DRL methods to compare. Lei has its result folder created but not filled in
+# yet; add it here once test data has landed (analyze.py handles missing
+# files gracefully, but including a method with zero data just floods the
+# run with "missing" warnings).
+METHODS = ["dan", "song", "sagc", "edsp"]
 METHOD_LABELS = {"dan": "DAN", "song": "Song", "sagc": "SAGC", "edsp": "EDSP", "lei": "Lei"}
 METHOD_COLORS = {
     "dan": "#4C72B0",     # blue
@@ -41,13 +41,24 @@ METHOD_COLORS = {
 # Layout under it: {METHOD_DIR}/test/seed{s}/{folder}_{mode}/*.xlsx
 METHOD_DIRS = {"dan": "DAN", "song": "Song", "sagc": "SAGC", "edsp": "EDSP", "lei": "Lei"}
 
-# Seeds
+# Seeds. Per-method override below for methods with fewer seeds available.
 SEEDS = [0, 1, 2]
+METHOD_SEEDS = {"edsp": [0]}
 
 # Inference modes. Same method color, distinguished by hatching in bar charts.
+# Per-method override below for methods without sampling data yet.
 MODES = ["greedy", "sample"]
 MODE_LABELS = {"greedy": "Greedy", "sample": "Sampling"}
 MODE_HATCHES = {"greedy": "", "sample": "///"}
+METHOD_MODES = {"edsp": ["greedy"]}
+
+
+def method_seeds(method: str) -> list[int]:
+    return METHOD_SEEDS.get(method, SEEDS)
+
+
+def method_modes(method: str) -> list[str]:
+    return METHOD_MODES.get(method, MODES)
 
 # Synthetic instance groups. 20x10 appears in both, jobs x machines.
 SYNTHETIC_MACHINES = ["20x5", "20x10", "20x20", "20x30"]   # jobs fixed at 20

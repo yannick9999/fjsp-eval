@@ -34,13 +34,13 @@ from common import (
     METHODS,
     MODE_HATCHES,
     MODE_LABELS,
-    MODES,
     PLOTS_DIR,
     SYNTHETIC_JOBS,
     SYNTHETIC_JOBS_X,
     SYNTHETIC_MACHINES,
     SYNTHETIC_MACHINES_X,
     combo_key,
+    method_modes,
 )
 
 mpl.rcParams.update({
@@ -73,7 +73,7 @@ def plot_iqm_bars(data: dict, sizes: list[str], out_name: str, title: str,
     misleading zero-height stub.
     """
     size_labels = size_labels or {}
-    combos = [(method, mode) for method in METHODS for mode in MODES]
+    combos = [(method, mode) for method in METHODS for mode in method_modes(method)]
 
     n_sizes = len(sizes)
     n_items = len(IQM_BASELINE_KEYS) + len(combos)
@@ -177,7 +177,7 @@ def plot_efficiency_lines(data: dict, sizes: list[str], x_values: list[float],
     (method, mode, size) combos are simply skipped, so a partial line is
     drawn instead of a misleading gap-filled one.
     """
-    combos = [(method, mode) for method in METHODS for mode in MODES]
+    combos = [(method, mode) for method in METHODS for mode in method_modes(method)]
 
     fig, ax = plt.subplots(figsize=figsize)
     fig.patch.set_facecolor('white')

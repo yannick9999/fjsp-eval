@@ -35,6 +35,8 @@ from common import (
     SCRIPT_DIR,
     SEEDS,
     combo_key,
+    method_modes,
+    method_seeds,
 )
 
 
@@ -52,7 +54,7 @@ def _drl_result_file(method: str, size: str, seed: int, mode: str) -> Path | Non
     """
     folder = RESULT_FOLDER_MAP[size]
     result_dir = SCRIPT_DIR / METHOD_DIRS[method] / "test" / f"seed{seed}" / f"{folder}_{mode}"
-    if method == "dan":
+    if method in ("dan", "edsp"):
         excel = result_dir / "results.xlsx"
         return excel if excel.exists() else None
     matches = sorted(result_dir.glob("test_results_*.xlsx"))
@@ -143,10 +145,12 @@ def build_score_matrix(method: str, size: str, c_best: dict[str, float],
     Returns:
         (score matrix, time matrix, list of instance_names), all shape
         (num_seeds, num_instances) resp. matching the matrix columns.
+        num_seeds is per-method (see METHOD_SEEDS in common.py).
     """
+    seeds = method_seeds(method)
     per_seed_makespans = []
     per_seed_times = []
-    for s in SEEDS:
+    for s in seeds:
         loaded = load_drl_test_results(method, size, s, mode)
         if loaded is None:
             print(f"  [warn] Test data missing: {method} seed{s} {size} {mode}")
@@ -166,9 +170,9 @@ def build_score_matrix(method: str, size: str, c_best: dict[str, float],
     if not instances:
         return np.array([]), np.array([]), []
 
-    score_matrix = np.zeros((len(SEEDS), len(instances)))
-    time_matrix = np.zeros((len(SEEDS), len(instances)))
-    for i, s in enumerate(SEEDS):
+    score_matrix = np.zeros((len(seeds), len(instances)))
+    time_matrix = np.zeros((len(seeds), len(instances)))
+    for i, s in enumerate(seeds):
         for j, inst in enumerate(instances):
             score_matrix[i, j] = c_best[inst] / per_seed_makespans[i][inst]
             time_matrix[i, j] = per_seed_times[i][inst]
@@ -199,7 +203,7 @@ def build_scores_for_size(size: str) -> tuple[dict[str, np.ndarray], dict[str, n
     time_dict = {}
     instances_ref = None
     for method in METHODS:
-        for mode in MODES:
+        for mode in method_modes(method):
             score_matrix, time_matrix, instances = build_score_matrix(method, size, c_best, mode)
             if score_matrix.size == 0:
                 continue
@@ -316,9 +320,9 @@ def build_brandimarte_per_instance() -> tuple[dict[str, dict[str, np.ndarray]],
     # Load all method data once (makespans only, Brandimarte has no efficiency plot)
     method_data = {}
     for method in METHODS:
-        for mode in MODES:
+        for mode in method_modes(method):
             per_seed = []
-            for s in SEEDS:
+            for s in method_seeds(method):
                 loaded = load_drl_test_results(method, BRANDIMARTE, s, mode)
                 if loaded is None:
                     print(f"  [warn] Test data missing: {method} seed{s} {BRANDIMARTE} {mode}")
