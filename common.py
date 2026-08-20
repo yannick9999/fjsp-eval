@@ -5,6 +5,9 @@ Data layout (relative to this script):
         sheets "makespan" and "solve_time"
         DAN: fixed filename "results.xlsx"
         others: timestamped "test_results_*.xlsx" (most recent one is used)
+    EDSP/{folder}/results.xlsx                              EDSP results
+        EDSP is deterministic (no seeds, no greedy/sampling distinction), so
+        it skips the test/seed/mode layout entirely, see method_modes().
     benchmarks/{BASELINE}/{folder}.csv                      baseline results
 
 Instance names in the xlsx/csv files may carry ".fjs" ("abz5.fjs") or not
@@ -46,11 +49,12 @@ SEEDS = [0, 1, 2]
 METHOD_SEEDS = {"edsp": [0]}
 
 # Inference modes. Same method color, distinguished by hatching in bar charts.
-# Per-method override below for methods without sampling data yet.
+# EDSP is deterministic and has no greedy/sampling distinction, so it uses the
+# single pseudo-mode "" (no hatch, no "(...)" suffix in labels, see plot.py).
 MODES = ["greedy", "sample"]
-MODE_LABELS = {"greedy": "Greedy", "sample": "Sampling"}
-MODE_HATCHES = {"greedy": "", "sample": "///"}
-METHOD_MODES = {"edsp": ["greedy"]}
+MODE_LABELS = {"greedy": "Greedy", "sample": "Sampling", "": ""}
+MODE_HATCHES = {"greedy": "", "sample": "///", "": ""}
+METHOD_MODES = {"edsp": [""]}
 
 
 def method_seeds(method: str) -> list[int]:

@@ -54,6 +54,17 @@ mpl.rcParams.update({
 })
 
 
+def combo_label(method: str, mode: str) -> str:
+    """Legend label for a (method, mode) combo.
+
+    EDSP has no greedy/sampling distinction (mode == ""), so it's just the
+    method name with no "(...)" suffix.
+    """
+    if not mode:
+        return METHOD_LABELS[method]
+    return f"{METHOD_LABELS[method]} ({MODE_LABELS[mode]})"
+
+
 def load_analysis() -> dict:
     if not ANALYSIS_CACHE.exists():
         raise FileNotFoundError(f"{ANALYSIS_CACHE} not found - run analyze.py first.")
@@ -154,7 +165,7 @@ def plot_iqm_bars(data: dict, sizes: list[str], out_name: str, title: str,
     # Legend
     all_handles = baseline_bar_handles + combo_bar_handles
     all_labels = [BASELINE_LABELS.get(b, b) for b in IQM_BASELINE_KEYS] + \
-        [f"{METHOD_LABELS[m]} ({MODE_LABELS[mo]})" for m, mo in combos]
+        [combo_label(m, mo) for m, mo in combos]
     ax.legend(all_handles, all_labels,
               loc="lower right", fontsize=11,
               frameon=True, framealpha=0.9,
@@ -201,7 +212,7 @@ def plot_efficiency_lines(data: dict, sizes: list[str], x_values: list[float],
                     color=METHOD_COLORS[method], linestyle=("--" if mode == "sample" else "-"),
                     marker="o", markersize=4, linewidth=1.4,
                     capsize=2, elinewidth=0.8, capthick=0.8,
-                    label=f"{METHOD_LABELS[method]} ({MODE_LABELS[mode]})", zorder=3)
+                    label=combo_label(method, mode), zorder=3)
 
     ax.set_yscale("log")
     ax.set_xticks(x_values)

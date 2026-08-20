@@ -50,11 +50,16 @@ def _drl_result_file(method: str, size: str, seed: int, mode: str) -> Path | Non
     """Resolves the result xlsx for a method/size/seed/mode, or None if missing.
 
     DAN writes a fixed "results.xlsx"; the other methods write a timestamped
-    "test_results_*.xlsx" per run, so the most recent match is used.
+    "test_results_*.xlsx" per run, so the most recent match is used. EDSP is
+    deterministic (no seeds, no greedy/sampling modes) and lives directly
+    under EDSP/{folder}/results.xlsx.
     """
     folder = RESULT_FOLDER_MAP[size]
+    if method == "edsp":
+        excel = SCRIPT_DIR / METHOD_DIRS[method] / folder / "results.xlsx"
+        return excel if excel.exists() else None
     result_dir = SCRIPT_DIR / METHOD_DIRS[method] / "test" / f"seed{seed}" / f"{folder}_{mode}"
-    if method in ("dan", "edsp"):
+    if method == "dan":
         excel = result_dir / "results.xlsx"
         return excel if excel.exists() else None
     matches = sorted(result_dir.glob("test_results_*.xlsx"))
